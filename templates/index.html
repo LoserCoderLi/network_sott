@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NN_us Model Interface</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+        }
+        .buttons {
+            width: 25%;
+        }
+        .network {
+            flex: 1;
+            border-left: 1px solid #000;
+            padding-left: 10px;
+        }
+        .image-display {
+            width: 33.33%;
+            border-left: 1px solid #000;
+            /*padding-left: 10px;*/
+        }
+        .disabled {
+            background-color: #ddd;
+            color: #999;
+            pointer-events: none;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        select:invalid {
+            color: gray;
+        }
+        option {
+            color: black;
+        }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>NN_us Model Interface</h1>
+    <div class="container">
+        <div class="buttons">
+            <!-- Compile Model -->
+            <h2>Compile Model</h2>
+<!--            <input type="text" id="optimizer_" placeholder="Optimizer">-->
+            <select id="optimizer" required>
+                <option value="" disabled selected hidden>Optimizer</option>
+                <option value='sgd'>sgd</option>
+                <option value='adam'>adam</option>
+                <option value='rms'>rms</option>
+                <option value="mse">mse</option>
+                <option value='adagrad'>adagrad</option>
+            </select>
+            <input type="number" id="learning_rate" placeholder="Learning Rate">
+<!--            <input type="text" id="loss" placeholder="Loss Function">-->
+            <select id="loss" required>
+                <option value="" disabled selected hidden>Loss Function</option>
+                <option value="categorical_crossentropy">categorical_crossentropy</option>
+                <option value="categorical_crossentropy_withsoftmax">categorical_crossentropy_withsoftmax</option>
+                <option value="binary_crossentropy">binary_crossentropy</option>
+                <option value="mse">mse</option>
+                <option value="huber">huber</option>
+                <option value="log_cosh">log_cosh</option>
+            </select>
+<!--            <input type="text" id="learning_style_" placeholder="Learning Style">-->
+            <select id="learning_style" required onchange="toggleStepInputs()">
+                <option value="" disabled selected hidden>Learning Style</option>
+                <option value="normal">normal</option>
+                <option value="rate_warmup">rate_warmup</option>
+            </select>
+<!--            <textarea id="shapes" placeholder="如果选择rate_warmup，可填（默认值1000，10000）"></textarea>-->
+            <input type="number" id="step_min" placeholder="Step Min" class="disabled" disabled>
+            <input type="number" id="step_max" placeholder="Step Max" class="disabled" disabled>
+
+            <select id="init_method" required>
+                <option value="" disabled selected hidden>Init Method</option>
+                <option value="random">random</option>
+                <option value="zero">zero</option>
+                <option value="uniform">uniform</option>
+                <option value="normal">normal</option>
+                <option value="xavier">xavier</option>
+                <option value="he">he</option>
+                <option value="scaled_normal">scaled_normal</option>
+            </select>
+
+            <button id="compileButton" onclick="compileModel()">Compile Model</button>
+            <div id="compileResult"></div>
+
+            <!-- Add Conv Layer -->
+            <h2>Add Conv Layer</h2>
+            <input type="number" id="input_channels" placeholder="Input Channels">
+            <input type="number" id="output_channels" placeholder="Output Channels">
+            <input type="number" id="kernel_size" placeholder="Kernel Size">
+            <input type="number" id="conv_stride" placeholder="Stride">
+            <input type="number" id="padding" placeholder="Padding">
+<!--            <input type="checkbox" id="conv"> Use Convolution-->
+            <button id="addConvButton" class="disabled" onclick="addConvLayer()">Add Conv Layer</button>
+            <div id="convResult"></div>
+
+            <!-- Add Max Pool Layer -->
+            <h2>Add Max Pool Layer</h2>
+            <input type="number" id="pool_size" placeholder="Pool Size">
+            <input type="number" id="maxpool_stride" placeholder="Stride">
+            <button id="addMaxPoolButton" class="disabled" onclick="addMaxPoolLayer()">Add Max Pool Layer</button>
+            <div id="maxPoolResult"></div>
+
+            <!-- Add Batch Norm Layer -->
+            <h2>Add Batch Norm Layer</h2>
+            <input type="number" id="num_features" placeholder="Number of Features">
+            <button id="addBatchNormButton" class="disabled" onclick="addBatchNormLayer()">Add Batch Norm Layer</button>
+            <div id="batchNormResult"></div>
+
+            <!-- Add Flatten Layer -->
+            <h2>Add Flatten Layer</h2>
+            <button id="addFlattenButton" class="disabled" onclick="addFlattenLayer()">Add Flatten Layer</button>
+            <div id="flattenResult"></div>
+
+            <!-- Add Layer -->
+            <h2>Add Layer</h2>
+            <input type="number" id="input_dim" placeholder="Input Dimension">
+            <input type="number" id="output_dim" placeholder="Output Dimension">
+            <button id="addLayerButton" class="disabled" onclick="addLayer()">Add Layer</button>
+            <div id="layerResult"></div>
+
+            <!-- Add Activation Layer -->
+            <h2>Add Activation Layer</h2>
+<!--            <input type="text" id="activation" placeholder="Activation Function">-->
+            <select id="activation" required>
+                <option value="" disabled selected hidden>Activation Function</option>
+                <option value="relu">relu</option>
+                <option value="sigmoid">sigmoid</option>
+                <option value="tanh">tanh</option>
+                <option value="softmax">softmax</option>
+                <option value="leaky_relu">leaky_relu</option>
+            </select>
+            <button id="addActivationButton" class="disabled" onclick="addActivationLayer()">Add Activation Layer</button>
+            <div id="activationResult"></div>
+
+            <!-- Add Residual Block -->
+            <h2>Add Residual Block</h2>
+            <input type="number" id="res_input_channels" placeholder="Input Channels">
+            <input type="number" id="res_output_channels" placeholder="Output Channels">
+            <input type="number" id="res_stride" placeholder="Stride">
+<!--            <input type="checkbox" id="use_batch_norm"> Use Batch Norm-->
+            <button id="addResidualBlockButton" class="disabled" onclick="addResidualBlock()">Add Residual Block</button>
+            <div id="residualBlockResult"></div>
+
+            <!-- Add Dropout Layer -->
+            <h2>Add Dropout Layer</h2>
+            <input type="number" id="dropout_p" placeholder="Dropout Probability">
+            <button id="addDropoutButton" class="disabled" onclick="addDropoutLayer()">Add Dropout Layer</button>
+            <div id="dropoutResult"></div>
+
+            <!-- Train Model -->
+            <h2>Train Model</h2>
+            <input type="number" id="epochs" placeholder="Epochs">
+            <button id="trainModelButton" class="disabled" onclick="trainModel()">Train Model</button>
+            <div id="trainResult"></div>
+        </div>
+
+        <div class="network">
+            <h2>Current Network Structure</h2>
+            <div id="networkStructure"></div>
+        </div>
+
+        <div class="image-display">
+            <h2>Image Display</h2>
+            <div id="metricsGraph"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleStepInputs() {
+            const learningStyle = document.getElementById('learning_style').value;
+            const stepMin = document.getElementById('step_min');
+            const stepMax = document.getElementById('step_max');
+
+            if (learningStyle === 'rate_warmup') {
+                stepMin.disabled = false;
+                stepMax.disabled = false;
+                stepMin.classList.remove('disabled');
+                stepMax.classList.remove('disabled');
+            } else {
+                stepMin.disabled = true;
+                stepMax.disabled = true;
+                stepMin.classList.add('disabled');
+                stepMax.classList.add('disabled');
+            }
+        }
+        function clearAllResults() {
+            document.getElementById('compileResult').innerText = '';
+            document.getElementById('convResult').innerText = '';
+            document.getElementById('maxPoolResult').innerText = '';
+            document.getElementById('batchNormResult').innerText = '';
+            document.getElementById('flattenResult').innerText = '';
+            document.getElementById('layerResult').innerText = '';
+            document.getElementById('activationResult').innerText = '';
+            document.getElementById('residualBlockResult').innerText = '';
+            document.getElementById('dropoutResult').innerText = '';
+            document.getElementById('trainResult').innerText = '';
+        }
+        async function compileModel() {
+            const optimizer = document.getElementById('optimizer').value;
+            const learning_rate = parseFloat(document.getElementById('learning_rate').value);
+            const learning_style = document.getElementById('learning_style').value;
+            const loss = document.getElementById('loss').value;
+            const init_method = document.getElementById('init_method').value;
+
+
+            const response = await fetch('/compile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ optimizer, learning_rate, learning_style, loss, init_method }),
+            });
+
+            const result = await response.json();
+            document.getElementById('compileResult').innerText = result.status;
+
+            if (result.status === 'Model compiled') {
+                document.getElementById('compileButton').classList.add('disabled');
+                enableButtons();
+            }
+            updateNetworkStructure();
+
+            // Reset input fields
+            document.getElementById('optimizer').value = "";
+            document.getElementById('learning_rate').value = "";
+            document.getElementById('learning_style').value = "";
+            document.getElementById('loss').value = "";
+            document.getElementById('step_min').value = "";
+            document.getElementById('step_max').value = "";
+            document.getElementById('init_method').value = "";
+
+            toggleStepInputs();  // Ensure step inputs are properly disabled
+        }
+
+        async function addConvLayer() {
+            clearAllResults(); // 清除所有结果消息
+
+            const input_channels = parseInt(document.getElementById('input_channels').value);
+            const output_channels = parseInt(document.getElementById('output_channels').value);
+            const kernel_size = parseInt(document.getElementById('kernel_size').value);
+            const stride = parseInt(document.getElementById('conv_stride').value) || 1;
+            const padding = parseInt(document.getElementById('padding').value) || 0;
+
+
+            // const conv = document.getElementById('conv').checked;
+
+            const response = await fetch('/add_conv', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ input_channels, output_channels, kernel_size, stride, padding}),
+            });
+
+            const result = await response.json();
+            document.getElementById('convResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('input_channels').value = "";
+            document.getElementById('output_channels').value = "";
+            document.getElementById('kernel_size').value = "";
+            document.getElementById('conv_stride').value = "";
+            document.getElementById('padding').value = "";
+        }
+
+        async function addMaxPoolLayer() {
+            clearAllResults(); // 清除所有结果消息
+
+            const pool_size = parseInt(document.getElementById('pool_size').value);
+            const stride = parseInt(document.getElementById('maxpool_stride').value);
+
+            const response = await fetch('/add_max_pool', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pool_size, stride }),
+            });
+
+            const result = await response.json();
+            document.getElementById('maxPoolResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('pool_size').value = "";
+            document.getElementById('maxpool_stride').value = "";
+        }
+
+        async function addBatchNormLayer() {
+            clearAllResults(); // 清除所有结果消息
+
+            const num_features = parseInt(document.getElementById('num_features').value);
+
+            const response = await fetch('/add_batch_norm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ num_features }),
+            });
+
+            const result = await response.json();
+            document.getElementById('batchNormResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('num_features').value = "";
+        }
+
+        async function addFlattenLayer() {
+            clearAllResults(); // 清除所有结果消息
+
+            const response = await fetch('/add_flatten', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const result = await response.json();
+            document.getElementById('flattenResult').innerText = result.status;
+            updateNetworkStructure();
+        }
+
+        async function addLayer() {
+            clearAllResults(); // 清除所有结果消息
+
+            const input_dim = parseInt(document.getElementById('input_dim').value);
+            const output_dim = parseInt(document.getElementById('output_dim').value);
+
+            const response = await fetch('/add_layer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ input_dim, output_dim }),
+            });
+
+            const result = await response.json();
+            document.getElementById('layerResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('input_dim').value = "";
+            document.getElementById('output_dim').value = "";
+
+        }
+
+        async function addActivationLayer() {
+            clearAllResults(); // 清除所有结果消息
+
+            const activation = document.getElementById('activation').value;
+
+            const response = await fetch('/add_activation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ activation }),
+            });
+
+            const result = await response.json();
+            document.getElementById('activationResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('activation').value = "";
+
+        }
+
+        async function addResidualBlock() {
+            clearAllResults(); // 清除所有结果消息
+
+            const input_channels = parseInt(document.getElementById('res_input_channels').value);
+            const output_channels = parseInt(document.getElementById('res_output_channels').value);
+            const stride = parseInt(document.getElementById('res_stride').value) || 1;
+            // const use_batch_norm = document.getElementById('use_batch_norm').checked;
+
+            const response = await fetch('/add_residual_block', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ input_channels, output_channels, stride}),
+            });
+
+            const result = await response.json();
+            document.getElementById('residualBlockResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('res_input_channels').value = "";
+            document.getElementById('res_output_channels').value = "";
+            document.getElementById('res_stride').value = "";
+            // document.getElementById('res_input_channels').value = "";
+
+        }
+
+        async function addDropoutLayer() {
+            clearAllResults(); // 清除所有结果消息
+
+            const p = parseFloat(document.getElementById('dropout_p').value);
+
+            const response = await fetch('/add_dropout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ p }),
+            });
+
+            const result = await response.json();
+            document.getElementById('dropoutResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('dropout_p').value = "";
+
+        }
+
+        async function trainModel() {
+            clearAllResults(); // 清除所有结果消息
+
+            const epochs = parseInt(document.getElementById('epochs').value) || 100;
+
+            const response = await fetch('/fit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ epochs }),
+            });
+
+            const result = await response.json();
+            document.getElementById('trainResult').innerText = result.status;
+            updateNetworkStructure();
+
+            document.getElementById('epochs').value = "";
+
+        }
+
+        async function updateNetworkStructure() {
+            const response = await fetch('/get_layers_inf');
+            const result = await response.json();
+            const layers = result.layers;
+            const networkStructureDiv = document.getElementById('networkStructure');
+            networkStructureDiv.innerHTML = layers.map(layer => `<p>${layer}</p>`).join('');
+        }
+
+        function enableButtons() {
+            document.querySelectorAll('.buttons button').forEach(button => {
+                if (button.id !== 'compileButton') {
+                    button.classList.remove('disabled');
+                }
+            });
+        }
+
+        async function fetchLatestData() {
+            const response = await fetch('/latest_data');
+            const result = await response.json();
+            if (result.data) {
+                plotMetrics(result.data);
+            }
+        }
+
+        function plotMetrics(data) {
+            const trace1 = {
+                x: data.epoch,
+                y: data.loss,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Loss',
+                yaxis: 'y1'
+            };
+
+            const trace2 = {
+                x: data.epoch,
+                y: data.accuracy,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Accuracy',
+                yaxis: 'y2'
+            };
+
+            const layout = {
+                title: 'Training Metrics',
+                xaxis: {
+                    title: 'Epoch'
+                },
+                yaxis: {
+                    title: 'Loss',
+                    side: 'left'
+                },
+                yaxis2: {
+                    title: 'Accuracy',
+                    overlaying: 'y',
+                    side: 'right'
+                }
+            };
+
+            const dataToPlot = [trace1, trace2];
+            Plotly.newPlot('metricsGraph', dataToPlot, layout);
+        }
+
+
+        setInterval(fetchLatestData, 1000); // Check for latest data every 1 seconds
+
+        // Initial load of network structure
+        updateNetworkStructure();
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+digraph G {
+	block1_conv1 [label=block1_conv1]
+	input -> block1_conv1
+	block1_conv2 [label=block1_conv2]
+	block1_conv1 -> block1_conv2
+	block1_bn [label=block1_bn]
+	block1_conv2 -> block1_bn
+	block1_pool [label=block1_pool]
+	block1_bn -> block1_pool
+	block2_conv1 [label=block2_conv1]
+	block1_pool -> block2_conv1
+	block2_conv2 [label=block2_conv2]
+	block2_conv1 -> block2_conv2
+	block2_bn [label=block2_bn]
+	block2_conv2 -> block2_bn
+	block2_pool [label=block2_pool]
+	block2_bn -> block2_pool
+	block3_conv1 [label=block3_conv1]
+	block2_pool -> block3_conv1
+	block3_conv2 [label=block3_conv2]
+	block3_conv1 -> block3_conv2
+	block3_conv3 [label=block3_conv3]
+	block3_conv2 -> block3_conv3
+	block3_bn [label=block3_bn]
+	block3_conv3 -> block3_bn
+	block3_pool [label=block3_pool]
+	block3_bn -> block3_pool
+	block4_conv1 [label=block4_conv1]
+	block3_pool -> block4_conv1
+	block4_conv2 [label=block4_conv2]
+	block4_conv1 -> block4_conv2
+	block4_conv3 [label=block4_conv3]
+	block4_conv2 -> block4_conv3
+	block4_bn [label=block4_bn]
+	block4_conv3 -> block4_bn
+	block4_pool [label=block4_pool]
+	block4_bn -> block4_pool
+	block5_conv1 [label=block5_conv1]
+	block4_pool -> block5_conv1
+	block5_conv2 [label=block5_conv2]
+	block5_conv1 -> block5_conv2
+	block5_conv3 [label=block5_conv3]
+	block5_conv2 -> block5_conv3
+	block5_bn [label=block5_bn]
+	block5_conv3 -> block5_bn
+	block5_pool [label=block5_pool]
+	block5_bn -> block5_pool
+	flatten [label=flatten]
+	block5_pool -> flatten
+	fc1 [label="dense(2048, 1024)"]
+	flatten -> fc1
+	fc1_activation [label="activation(relu)"]
+	fc1 -> fc1_activation
+	dropout [label="dropout(0.5)"]
+	fc1_activation -> dropout
+	fc2 [label="dense(1024, 2)"]
+	dropout -> fc2
+	fc2_activation [label="activation(sigmoid)"]
+	fc2 -> fc2_activation
+}
