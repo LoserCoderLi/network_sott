@@ -4,6 +4,19 @@ from training.Optimizer import LearningRateScheduler
 
 
 def im2col(input_data, filter_h, filter_w, stride=1, pad=0):
+        """
+    将输入的多维图像数据转换为二维矩阵，用于卷积运算的高效实现。
+    
+    参数:
+    - input_data: 输入的图像数据，形状为 (N, C, H, W)
+    - filter_h: 滤波器的高度
+    - filter_w: 滤波器的宽度
+    - stride: 滤波器应用的步长，默认为 1
+    - pad: 图像边缘的填充量，默认为 0
+    
+    返回:
+    - col: 转换后的二维矩阵，形状为 (N * out_h * out_w, C * filter_h * filter_w)
+    """
     N, C, H, W = input_data.shape
     H_padded, W_padded = H + 2 * pad, W + 2 * pad
     if pad > 0:
@@ -20,6 +33,20 @@ def im2col(input_data, filter_h, filter_w, stride=1, pad=0):
 
 
 def col2im(col, input_shape, filter_h, filter_w, stride=1, pad=0):
+        """
+    将二维矩阵转换回多维图像数据，这是 im2col 操作的逆过程。
+    
+    参数:
+    - col: 经过 im2col 转换的二维矩阵
+    - input_shape: 输入的图像数据的形状 (N, C, H, W)
+    - filter_h: 滤波器的高度
+    - filter_w: 滤波器的宽度
+    - stride: 滤波器应用的步长，默认为 1
+    - pad: 图像边缘的填充量，默认为 0
+    
+    返回:
+    - img: 还原后的多维图像数据
+    """
     N, C, H, W = input_shape
     H_padded, W_padded = H + 2 * pad, W + 2 * pad
     out_h = (H_padded - filter_h) // stride + 1
