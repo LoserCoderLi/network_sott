@@ -4,6 +4,17 @@ import numpy as np
 
 class FullyConnectedLayer:
     def __init__(self, input_dim, output_dim, optimizer, init_method='he', lr_schedule='normal', name='fc'):
+                """
+        初始化全连接层的参数。
+        
+        参数:
+        - input_dim: 输入特征的维度
+        - output_dim: 输出特征的维度
+        - optimizer: 优化器对象，用于更新权重
+        - init_method: 权重初始化方法，默认为 'he'
+        - lr_schedule: 学习率调度方法，默认为 'normal'
+        - name: 层的名称，默认为 'fc'
+        """
         # fan_in = input_dim
         # fan_out = output_dim
         # self.weights = np.random.randn(input_dim, output_dim) / np.sqrt(fan_in)
@@ -21,6 +32,15 @@ class FullyConnectedLayer:
         #                                      total_steps=10000)
 
     def initialize_weights(self, method):
+        """
+        根据指定的方法初始化权重。
+        
+        参数:
+        - method: 权重初始化的方法 ('he' 或其他)
+        
+        返回:
+        - weights: 初始化的权重矩阵
+        """
         shape = (self.input_dim, self.output_dim)
         if method == 'random':
             return self.random_initialization(shape)
@@ -91,6 +111,15 @@ class FullyConnectedLayer:
         self.biases = params['biases']
 
     def forward(self, input_data):
+        """
+        前向传播计算，计算输入与权重的线性组合并加上偏置。
+        
+        参数:
+        - x: 输入数据，形状为 (N, input_dim)
+        
+        返回:
+        - out: 计算后的输出数据，形状为 (N, output_dim)
+        """
 
         self.input_data = input_data
         # print("Forward - Input shape:", input_data.shape)
@@ -101,6 +130,15 @@ class FullyConnectedLayer:
         return np.dot(input_data, self.weights) + self.biases
 
     def backward(self, grads):
+               """
+        反向传播计算，更新权重和偏置的梯度。
+        
+        参数:
+        - dout: 上一层传递来的梯度
+        
+        返回:
+        - dx: 当前层对输入的梯度
+        """
         # print("Backward - Grads shape:", grads.shape)
         self.grad_w = np.dot(self.input_data.T, grads)
         self.grad_b = np.sum(grads, axis=0)
