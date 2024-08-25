@@ -3,6 +3,15 @@ import numpy as np
 
 class LearningRateScheduler:
     def __init__(self, initial_lr, schedule_type='normal', warmup_steps=0, total_steps=10000):
+        """
+        初始化学习率调度器。
+        
+        参数:
+        - initial_lr: 初始学习率
+        - schedule_type: 调度类型，默认为 'normal'
+        - warmup_steps: 预热步骤的数量，默认为 0
+        - total_steps: 总训练步骤数，默认为 10000
+        """
         self.initial_lr = initial_lr
         self.schedule_type = schedule_type
         self.warmup_steps = warmup_steps
@@ -10,6 +19,15 @@ class LearningRateScheduler:
         self.current_step = 0
 
     def get_lr(self, current_step=None):
+                """
+        根据当前训练步骤获取当前的学习率。
+        
+        参数:
+        - current_step: 当前训练步骤，如果未指定则使用类中的 current_step
+        
+        返回:
+        - lr: 当前的学习率
+        """
         if current_step is not None:
             self.current_step = current_step
 
@@ -26,7 +44,9 @@ class LearningRateScheduler:
 
     def step(self):
         self.current_step += 1
-
+        """
+        更新当前的训练步骤。
+        """
 
 
 '''
