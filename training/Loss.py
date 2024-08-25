@@ -37,6 +37,16 @@ class LossFunctions:
     '''
 
     class BinaryCrossEntropy:
+                """
+        二分类交叉熵损失函数。
+
+        参数:
+        - y_true: 真实标签，值为0或1。
+        - y_pred: 预测概率，值在0到1之间。
+
+        返回:
+        - loss: 二分类交叉熵损失值。
+        """
         Attribute = "分类"
 
         def loss(self, y_true, y_pred):
@@ -50,6 +60,16 @@ class LossFunctions:
             return -(y_true / y_pred - (1. - y_true) / (1. - y_pred))
 
     class CategoricalCrossEntropy:
+                """
+        多分类交叉熵损失函数。
+
+        参数:
+        - y_true: 真实标签的独热编码形式。
+        - y_pred: 预测概率分布。
+
+        返回:
+        - loss: 多分类交叉熵损失值。
+        """
         Attribute = "分类"
 
         def loss(self, y_true, y_pred):
@@ -89,6 +109,16 @@ class LossFunctions:
             return self.grad_cache - y_true
 
     class MeanSquaredError:
+                        """
+        均方误差损失函数，常用于回归问题。
+
+        参数:
+        - y_true: 真实值。
+        - y_pred: 预测值。
+
+        返回:
+        - loss: 均方误差值。
+        """
         Attribute = "回归"
 
         def loss(self, y_true, y_pred):
@@ -101,6 +131,17 @@ class LossFunctions:
             return 2 * (y_pred - y_true) / y_true.shape[0]
 
     class HuberLoss:
+               """
+        Huber 损失函数，对异常值不敏感的回归损失。
+
+        参数:
+        - y_true: 真实值。
+        - y_pred: 预测值。
+        - delta: 阈值，用于调整损失函数的平滑程度。
+
+        返回:
+        - loss: Huber 损失值。
+        """
         Attribute = "回归"
 
         def __init__(self, delta=1.0):
@@ -121,6 +162,16 @@ class LossFunctions:
             return np.where(is_small_error, squared_grad, linear_grad)
 
     class LogCoshLoss:
+                """
+        Log-cosh 损失函数，一种对大误差平滑处理的回归损失。
+
+        参数:
+        - y_true: 真实值。
+        - y_pred: 预测值。
+
+        返回:
+        - loss: Log-cosh 损失值。
+        """
         Attribute = "回归"
 
         def loss(self, y_true, y_pred):
